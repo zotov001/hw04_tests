@@ -1,5 +1,4 @@
 {% extends 'base.html' %} 
-{% load thumbnail %}
 {% block title %}
     <title>Профайл пользователя {{ author }}</title>
 {% endblock %}
@@ -20,9 +19,6 @@
           Дата публикации: {{ post.pub_date|date:"d E Y" }}
         </li>
       </ul>
-      {% thumbnail post.image "500x150" crop="center" upscale=True as im %}
-        <img class="card-img my-2" src="{{ im.url }}">
-      {% endthumbnail %}
       <p>
         {{ post.text|linebreaksbr }}
       </p>
