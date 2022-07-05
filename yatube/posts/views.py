@@ -73,7 +73,11 @@ def post_create(request, is_edit=False):
 def post_edit(request, post_id):
     """Редактирование поста."""
     post = get_object_or_404(Post, pk=post_id)
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post
+    )
     if post.author != request.user:
         return redirect('posts:profile', request.user.username)
     context = {
