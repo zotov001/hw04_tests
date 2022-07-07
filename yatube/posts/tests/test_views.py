@@ -41,12 +41,22 @@ class PostViewTest(TestCase):
             {'post_id': cls.post.id}
         )
         cls.create = (
-            'posts/create_post.html', 'posts:post_create',
-            None
-        )
+            'posts/create_post.html', 'posts:post_create', None)
         cls.post_edit = (
             'posts/create_post.html', 'posts:post_edit',
             {'post_id': cls.post.id}
+        )
+        cls.templates_pages_for_authorized = (
+            cls.index,
+            cls.group_list,
+            cls.profile,
+            cls.post_detail,
+            cls.create
+        )
+        cls.templates_for_paginator = (
+            cls.index,
+            cls.group_list,
+            cls.profile
         )
 
     def setUp(self):
@@ -56,19 +66,12 @@ class PostViewTest(TestCase):
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        templates_pages_names = [
-            self.index,
-            self.group_list,
-            self.profile,
-            self.post_detail,
-            self.create
-        ]
-        for url_template in templates_pages_names:
+        for url, name, arg in self.templates_pages_for_authorized:
             reverse_url_template = reverse(
-                url_template[1], kwargs=url_template[2])
+                name, kwargs=arg)
             with self.subTest(reverse_url_template=reverse_url_template):
                 response = self.authorized_client.get(reverse_url_template)
-                self.assertTemplateUsed(response, url_template[0])
+                self.assertTemplateUsed(response, url)
 
     def test_post_edit_page_show_correct_context(self):
         """URL-адрес использует соответствующий шаблон post_edit."""
@@ -130,13 +133,8 @@ class PostViewTest(TestCase):
 
     def test_post_correct_create_on_page(self):
         """Проверка, что пост добавился на страницы."""
-        templates = [
-            self.index,
-            self.group_list,
-            self.profile
-        ]
-        for template in templates:
-            rev_template = reverse(template[1], kwargs=template[2])
+        for url, name, arg in self.templates_for_paginator:
+            rev_template = reverse(name, kwargs=arg)
             with self.subTest(rev_template=rev_template):
                 response = self.authorized_client.get(rev_template)
                 self.assertEqual(
@@ -155,13 +153,8 @@ class PostViewTest(TestCase):
 
     def test_paginator_correct(self):
         """ Проверка паджинатора. """
-        templates = [
-            self.index,
-            self.group_list,
-            self.profile
-        ]
-        for template in templates:
-            rev_template = reverse(template[1], kwargs=template[2])
+        for url, name, arg in self.templates_for_paginator:
+            rev_template = reverse(name, kwargs=arg)
             with self.subTest(rev_template=rev_template):
                 response = self.authorized_client.get(rev_template)
                 self.assertEqual(len(response.context['page_obj']), NUM_POSTS)
