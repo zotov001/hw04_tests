@@ -24,16 +24,16 @@ class PostModelTest(TestCase):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         fields = {
-            PostModelTest.post.text[:15]: PostModelTest.post,
-            PostModelTest.group.title: PostModelTest.group,
+            self.post.text[:15]: self.post,
+            self.group.title: self.group,
         }
         for value, expected in fields.items():
             with self.subTest(value=value):
                 self.assertEqual(value, str(expected))
 
     def post_verbose_name(self):
-        """verbose_name в полях совпадает с ожидаемым. пока не работает"""
-        post = PostModelTest.post
+        """verbose_name в полях совпадает с ожидаемым."""
+        post = self.post
         field_verboses = {
             'text': 'Текст поста',
             'pub_date': 'Дата публикации',

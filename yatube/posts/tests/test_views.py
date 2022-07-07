@@ -27,34 +27,25 @@ class PostViewTest(TestCase):
                 text='Тестовый пост',
                 group=cls.group,
             )
-        cls.index = (
-            'posts/index.html',
-            'posts:index',
-            None
-        )
+        cls.index = ('posts/index.html', 'posts:index', None)
         cls.group_list = (
-            'posts/group_list.html',
-            'posts:group_list',
+            'posts/group_list.html', 'posts:group_list',
             {'slug': cls.group.slug}
         )
         cls.profile = (
-            'posts/profile.html',
-            'posts:profile',
+            'posts/profile.html', 'posts:profile',
             {'username': cls.user}
         )
         cls.post_detail = (
-            'posts/post_detail.html',
-            'posts:post_detail',
+            'posts/post_detail.html', 'posts:post_detail',
             {'post_id': cls.post.id}
         )
         cls.create = (
-            'posts/create_post.html',
-            'posts:post_create',
+            'posts/create_post.html', 'posts:post_create',
             None
         )
         cls.post_edit = (
-            'posts/create_post.html',
-            'posts:post_edit',
+            'posts/create_post.html', 'posts:post_edit',
             {'post_id': cls.post.id}
         )
 
@@ -66,11 +57,11 @@ class PostViewTest(TestCase):
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_pages_names = [
-            PostViewTest.index,
-            PostViewTest.group_list,
-            PostViewTest.profile,
-            PostViewTest.post_detail,
-            PostViewTest.create
+            self.index,
+            self.group_list,
+            self.profile,
+            self.post_detail,
+            self.create
         ]
         for url_template in templates_pages_names:
             reverse_url_template = reverse(
@@ -140,9 +131,9 @@ class PostViewTest(TestCase):
     def test_post_correct_create_on_page(self):
         """Проверка, что пост добавился на страницы."""
         templates = [
-            PostViewTest.index,
-            PostViewTest.group_list,
-            PostViewTest.profile
+            self.index,
+            self.group_list,
+            self.profile
         ]
         for template in templates:
             rev_template = reverse(template[1], kwargs=template[2])
@@ -165,9 +156,9 @@ class PostViewTest(TestCase):
     def test_paginator_correct(self):
         """ Проверка паджинатора. """
         templates = [
-            PostViewTest.index,
-            PostViewTest.group_list,
-            PostViewTest.profile
+            self.index,
+            self.group_list,
+            self.profile
         ]
         for template in templates:
             rev_template = reverse(template[1], kwargs=template[2])

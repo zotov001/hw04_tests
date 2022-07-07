@@ -29,8 +29,17 @@ class PostCreateTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
+    def template_test(self, test_post, form_data):
+        """Общие тесты для создания новой/редактирования записи в БД."""
+        self.assertEqual(
+            test_post.text, form_data['text'])
+        self.assertEqual(
+            test_post.author.username, self.post.author.username)
+        self.assertEqual(
+            test_post.group.title, self.post.group.title)
+
     def test_create_post(self):
-        """Проверка создания новой записи в БД +-."""
+        """Проверка создания новой записи в БД."""
         posts_count = Post.objects.count()
         form_data = {
             'text': 'Новый пост',
@@ -42,13 +51,8 @@ class PostCreateTest(TestCase):
             'posts:profile', args=[self.user.username]))
         self.assertEqual(
             Post.objects.count(), posts_count + 1)
-        test_post = response.context['page_obj'].object_list[1]
-        self.assertEqual(
-            test_post.text, self.post.text)
-        self.assertEqual(
-            test_post.author.username, self.post.author.username)
-        self.assertEqual(
-            test_post.group.title, self.post.group.title)
+        test_post = response.context['page_obj'].object_list[0]
+        self.template_test(test_post, form_data)
 
     def test_edit_post(self):
         """Проверка изменения записи в БД."""
@@ -59,6 +63,8 @@ class PostCreateTest(TestCase):
         }
         response = self.authorized_client.post(
             reverse('posts:post_edit', args=[1]), data=form_data, follow=True)
-        self.assertRedirects(response, reverse('posts:post_detail', args=[1]))
+        self.assertRedirects(response, reverse((
+            'posts:post_detail'), args=[1]))
         self.assertEqual(Post.objects.count(), posts_count)
-        self.assertTrue(Post.objects.filter(text='Измененный пост').exists())
+        test_edit_post = response.context['post']
+        self.template_test(test_edit_post, form_data)
