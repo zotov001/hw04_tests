@@ -7,7 +7,8 @@ from posts.models import Group, Post
 
 User = get_user_model()
 
-NUM_POSTS = 10
+NUM_POSTS_FIRST_PAGE = 10
+NUM_POSTS_LAST_PAGE = 3
 NUM_OF_POST = 0
 
 
@@ -64,47 +65,42 @@ class PostViewTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_pages_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
-        for url, name, arg in self.templates_pages_for_authorized:
-            reverse_url_template = reverse(
-                name, kwargs=arg)
-            with self.subTest(reverse_url_template=reverse_url_template):
-                response = self.authorized_client.get(reverse_url_template)
-                self.assertTemplateUsed(response, url)
-
-    def test_post_edit_page_show_correct_context(self):
-        """URL-адрес использует соответствующий шаблон post_edit."""
-        response = self.authorized_client.get(
-            reverse(self.post_edit[1], kwargs=self.post_edit[2])
-        ),
-        if self.authorized_client == self.post.author:
-            self.assertTemplateUsed(response, self.create[0])
+    def template_test(self, test_post):
+        """Общие тесты для проверки отображения."""
+        self.assertEqual(
+            test_post.text, self.post.text)
+        self.assertEqual(
+            test_post.author.username, self.post.author.username)
+        self.assertEqual(
+            test_post.group.title, self.group.title)
 
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.guest_client.get(reverse(self.index[1]))
-        self.assertEqual(
-            response.context['page_obj'].object_list[0], self.post)
+        test_post = response.context['page_obj'][0]
+        self.template_test(test_post)
 
     def test_group_list_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.guest_client.get(
             reverse(self.group_list[1], kwargs=self.group_list[2])
         )
-        self.assertEqual(response.context.get('group'), self.group)
+        test_post = response.context['page_obj'][0]
+        self.template_test(test_post)
 
     def test_profile_show_correct_context(self):
         """Шаблон profile получает правильный контекст."""
         response = self.guest_client.get(
             reverse(self.profile[1], kwargs=self.profile[2]))
-        self.assertEqual(response.context.get('author'), self.post.author)
+        test_post = response.context['page_obj'][0]
+        self.template_test(test_post)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail получает правильный контекст."""
         response = self.guest_client.get(
             reverse(self.post_detail[1], kwargs=self.post_detail[2]))
-        self.assertEqual(response.context.get('post'), self.post)
+        test_post = response.context.get('post')
+        self.template_test(test_post)
 
     def test_create_post_show_correct_context(self):
         """Шаблон create_post сформирован с правильным контекстом."""
@@ -157,4 +153,14 @@ class PostViewTest(TestCase):
             rev_template = reverse(name, kwargs=arg)
             with self.subTest(rev_template=rev_template):
                 response = self.authorized_client.get(rev_template)
-                self.assertEqual(len(response.context['page_obj']), NUM_POSTS)
+                self.assertEqual(len(
+                    response.context['page_obj']), NUM_POSTS_FIRST_PAGE)
+
+    def test_paginator_last_page(self):
+        """ Проверка паджинатора. """
+        for url, name, arg in self.templates_for_paginator:
+            rev_template = reverse(name, kwargs=arg)
+            with self.subTest(rev_template=rev_template):
+                response = self.authorized_client.get(rev_template + '?page=2')
+                self.assertEquals(len(
+                    response.context['page_obj']), NUM_POSTS_LAST_PAGE)
